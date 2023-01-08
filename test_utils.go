@@ -8,8 +8,6 @@ import (
 	"strings"
 )
 
-// Want a function for each public function in this module that calls the python version
-// with the appropriate arguments
 
 // pythonCount runs python's `itertools.count(start, step)` `n` times and returns the
 // result as a `[]int`
