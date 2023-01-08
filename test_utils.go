@@ -8,7 +8,6 @@ import (
 	"strings"
 )
 
-
 // pythonCount runs python's `itertools.count(start, step)` `n` times and returns the
 // result as a `[]int`
 func pythonCount(start, step, n int) []int {
@@ -33,6 +32,9 @@ func pythonCount(start, step, n int) []int {
 	return result
 }
 
+// str_array is a helper function that converts a slice into a string representation
+// of the slice. You might ask why not just `fmt.Sprintf` the slice, but that does not
+// put commas between items, and python wants commas. So we write this helper function
 func str_array(data []int) string {
 	var sb strings.Builder
 	sb.WriteString("[")
@@ -45,6 +47,8 @@ func str_array(data []int) string {
 
 func pythonAccumulate(data []int) []int {
 	str_data := str_array(data)
+	// We're just going to do the most simple type of accumulation here, adding each item
+	// to the sum
 	py_str := fmt.Sprintf("from py_versions import accumulate; accumulate(%s)", str_data)
 	cmd := exec.Command("python", "-c", py_str)
 
