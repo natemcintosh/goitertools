@@ -76,11 +76,13 @@ func TestAccumulateMin(t *testing.T) {
 }
 
 func ExampleAccumulate() {
-	c := make(chan float64)
+	c := make(chan int)
 
 	// Using a non-cummutative function, i.e. a-b != b-a
-	sub := func(a, b float64) float64 { return a - b }
-	data := []float64{5, 4, 3, 2, 1}
+	sub := func(a, b int) int { return a - b }
+	data := []int{5, 4, 3, 2, 1}
+	// The first item sent from Accumulate will be `initial - data[0]`, in this case
+	// 0 - 5 = -5
 	go Accumulate(data, sub, 0, c)
 
 	for v := range c {
