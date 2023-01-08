@@ -14,7 +14,14 @@ package goitertools
 //
 // Also note that the first sent by `c` will be the first item in data. See
 // `AccumulateWithInit` for a version of this function that starts with `initial`
+//
+// If `data` is empty, the channel is immediately closed
 func Accumulate[T any](data []T, fn func(T, T) T, c chan T) {
+	if len(data) == 0 {
+		close(c)
+		return
+	}
+
 	res := data[0]
 	c <- res
 
@@ -27,6 +34,10 @@ func Accumulate[T any](data []T, fn func(T, T) T, c chan T) {
 
 // AccumulateWithInit behaves in the same manner has Accumulate, but the first item
 // sent by `c` is `initial`
+//
+// If `data` is empty, this channel will send `initial` and then close.
+// Note the difference from `Accumulate` which immediately closes the channel having
+// sent nothing
 func AccumulateWithInit[T any](data []T, fn func(T, T) T, initial T, c chan T) {
 	res := initial
 	c <- res

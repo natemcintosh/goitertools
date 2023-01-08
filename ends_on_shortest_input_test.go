@@ -75,6 +75,36 @@ func TestAccumulateWithInitMin(t *testing.T) {
 	}
 }
 
+func TestAccumulateWithInitOneItem(t *testing.T) {
+	c := make(chan int)
+
+	add := func(a, b int) int { return a + b }
+	go AccumulateWithInit([]int{1}, add, 0, c)
+
+	want := []int{0, 1}
+
+	idx := 0
+	for v := range c {
+		assert.Equal(t, want[idx], v)
+		idx += 1
+	}
+}
+
+func TestAccumulateWithInitEmpty(t *testing.T) {
+	c := make(chan int)
+
+	add := func(a, b int) int { return a + b }
+	go AccumulateWithInit([]int{}, add, 0, c)
+
+	want := []int{0}
+
+	idx := 0
+	for v := range c {
+		assert.Equal(t, want[idx], v)
+		idx += 1
+	}
+}
+
 func ExampleAccumulateWithInit() {
 	c := make(chan int)
 
@@ -181,4 +211,32 @@ func ExampleAccumulate() {
 	// -4
 	// -5
 
+}
+
+func TestAccumulateOneItem(t *testing.T) {
+	c := make(chan int)
+
+	add := func(a, b int) int { return a + b }
+	go Accumulate([]int{1}, add, c)
+
+	want := []int{1}
+
+	idx := 0
+	for v := range c {
+		assert.Equal(t, want[idx], v)
+		idx += 1
+	}
+}
+
+func TestAccumulateEmpty(t *testing.T) {
+	c := make(chan int)
+
+	add := func(a, b int) int { return a + b }
+	go Accumulate([]int{}, add, c)
+
+	collected := make([]int, 0)
+	for v := range c {
+		collected = append(collected, v)
+	}
+	assert.Empty(t, collected)
 }
