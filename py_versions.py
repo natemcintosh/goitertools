@@ -13,3 +13,8 @@ def take(n, iterable):
 def n_count(start: int, step: int, n: int):
     for c in take(n, itertools.count(start, step)):
         print(c)
+
+
+def accumulate(data: list[int]):
+    for d in itertools.accumulate(data):
+        print(d)

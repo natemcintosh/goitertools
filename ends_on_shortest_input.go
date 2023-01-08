@@ -17,11 +17,13 @@ package goitertools
 //
 // If `data` is empty, the channel is immediately closed
 func Accumulate[S ~[]T, T any](data S, fn func(T, T) T, c chan T) {
+	// If there's no data, close the channel and return
 	if len(data) == 0 {
 		close(c)
 		return
 	}
 
+	// Send the first item
 	res := data[0]
 	c <- res
 

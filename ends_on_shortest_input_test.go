@@ -3,6 +3,7 @@ package goitertools
 import (
 	"fmt"
 	"math"
+	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -239,4 +240,41 @@ func TestAccumulateEmpty(t *testing.T) {
 		collected = append(collected, v)
 	}
 	assert.Empty(t, collected)
+}
+
+func FuzzAccumulate(f *testing.F) {
+	// For this fuzz test, input should be just a random seed. We'll use rand to generate
+	// how many items should go into `data`, and then fill it up
+	f.Add(int64(42))
+	f.Fuzz(func(t *testing.T, rand_seed int64) {
+		// Set the seed so that we always pick the same n for the inputs of this function
+		rand.Seed(rand_seed)
+		// Don't both checking more than 100 numbers
+		n := rand.Intn(100)
+		// Make sure n isn't 0
+		n += 1
+
+		data := make([]int, n)
+		for i := 0; i < n; i++ {
+			data[i] = rand.Intn(1000)
+		}
+
+		// Get the python output. Obviously firing up python every iteration is not ideal,
+		// but haven't yet figured out a way to keep python up and running between calls
+		want := pythonAccumulate(data)
+
+		// Get the go output
+		got := make([]int, n)
+		c := make(chan int)
+		add := func(a, b int) int { return a + b }
+
+		go Accumulate(data, add, c)
+
+		for i := 0; i < n; i++ {
+			got[i] = <-c
+		}
+
+		// Check that the go output matches python
+		assert.Equal(t, want, got)
+	})
 }
