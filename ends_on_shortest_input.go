@@ -1,8 +1,8 @@
 package goitertools
 
-// Accumulate sends accumulated results. E.g. if `fn` adds the two inputs, then the
-// channel sends the cumulative sum:
-// `Accumulate([]int{1, 2, 3, 4}, func(a, b int) int { return a + b }, 0, c) --> 1, 3, 6, 10`
+// Accumulate sends accumulated results. E.g. if `fn` adds the two inputs, then
+// the channel sends the cumulative sum:
+// `Accumulate([]int{1, 2, 3, 4}, func(a, b int) int { return a + b }, c) --> 1, 3, 6, 10`
 //
 // It is not recommended to use data where T is a pointer or pointer-like (e.g. slice)
 // As items in `data`, or `initial` may be changed. It also is not threadsafe
@@ -11,8 +11,26 @@ package goitertools
 // value first, and then the next item from data. E.g. for subtraction with
 // `data := []int{3, 2, 1}`, Accumulate sends 3, 1, 0. If `data := []int{1, 2, 3}`,
 // Accumulate sends 1, -1, -4
-func Accumulate[T any](data []T, fn func(T, T) T, initial T, c chan T) {
+//
+// Also note that the first sent by `c` will be the first item in data. See
+// `AccumulateWithInit` for a version of this function that starts with `initial`
+func Accumulate[T any](data []T, fn func(T, T) T, c chan T) {
+	res := data[0]
+	c <- res
+
+	for _, d := range data[1:] {
+		res = fn(res, d)
+		c <- res
+	}
+	close(c)
+}
+
+// AccumulateWithInit behaves in the same manner has Accumulate, but the first item
+// sent by `c` is `initial`
+func AccumulateWithInit[T any](data []T, fn func(T, T) T, initial T, c chan T) {
 	res := initial
+	c <- res
+
 	for _, d := range data {
 		res = fn(res, d)
 		c <- res

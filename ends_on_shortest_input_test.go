@@ -8,13 +8,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAccumulateAdd(t *testing.T) {
+func TestAccumulateWithInitAdd(t *testing.T) {
 	c := make(chan int)
 
 	add := func(a, b int) int { return a + b }
-	go Accumulate([]int{1, 2, 3, 4, 5}, add, 0, c)
+	go AccumulateWithInit([]int{1, 2, 3, 4, 5}, add, 0, c)
 
-	want := []int{1, 3, 6, 10, 15}
+	want := []int{0, 1, 3, 6, 10, 15}
 
 	idx := 0
 	for v := range c {
@@ -23,23 +23,23 @@ func TestAccumulateAdd(t *testing.T) {
 	}
 }
 
-func BenchmarkAccumulateAdd(b *testing.B) {
+func BenchmarkAccumulateWithInitAdd(b *testing.B) {
 	c := make(chan int)
 	add := func(a, b int) int { return a + b }
-	go Accumulate([]int{1, 2, 3, 4, 5}, add, 0, c)
+	go AccumulateWithInit([]int{1, 2, 3, 4, 5}, add, 0, c)
 
 	for i := 0; i < b.N; i++ {
 		<-c
 	}
 }
 
-func TestAccumulateAdd2(t *testing.T) {
+func TestAccumulateWithInitAdd2(t *testing.T) {
 	c := make(chan int)
 
 	add := func(a, b int) int { return a + b }
-	go Accumulate([]int{1, 2, 3, 4, 5}, add, 10, c)
+	go AccumulateWithInit([]int{1, 2, 3, 4, 5}, add, 10, c)
 
-	want := []int{11, 13, 16, 20, 25}
+	want := []int{10, 11, 13, 16, 20, 25}
 
 	idx := 0
 	for v := range c {
@@ -48,12 +48,12 @@ func TestAccumulateAdd2(t *testing.T) {
 	}
 }
 
-func TestAccumulateMax(t *testing.T) {
+func TestAccumulateWithInitMax(t *testing.T) {
 	c := make(chan float64)
 
-	go Accumulate([]float64{1, 2, 3, 4, 5}, math.Max, 0, c)
+	go AccumulateWithInit([]float64{1, 2, 3, 4, 5}, math.Max, 0, c)
 
-	want := []float64{1, 2, 3, 4, 5}
+	want := []float64{0, 1, 2, 3, 4, 5}
 
 	idx := 0
 	for v := range c {
@@ -62,11 +62,11 @@ func TestAccumulateMax(t *testing.T) {
 	}
 }
 
-func TestAccumulateMin(t *testing.T) {
+func TestAccumulateWithInitMin(t *testing.T) {
 	c := make(chan float64)
-	go Accumulate([]float64{1, 2, 3, 4, 5}, math.Min, 1, c)
+	go AccumulateWithInit([]float64{1, 2, 3, 4, 5}, math.Min, 3, c)
 
-	want := []float64{1, 1, 1, 1, 1}
+	want := []float64{3, 1, 1, 1, 1, 1}
 
 	idx := 0
 	for v := range c {
@@ -75,20 +75,20 @@ func TestAccumulateMin(t *testing.T) {
 	}
 }
 
-func ExampleAccumulate() {
+func ExampleAccumulateWithInit() {
 	c := make(chan int)
 
 	// Using a non-cummutative function, i.e. a-b != b-a
 	sub := func(a, b int) int { return a - b }
 	data := []int{5, 4, 3, 2, 1}
-	// The first item sent from Accumulate will be `initial - data[0]`, in this case
-	// 0 - 5 = -5
-	go Accumulate(data, sub, 0, c)
+	// The first item sent from AccumulateWithInit will be `initial`
+	go AccumulateWithInit(data, sub, 0, c)
 
 	for v := range c {
 		fmt.Printf("%v\n", v)
 	}
-	//Output: -5
+	//Output: 0
+	// -5
 	// -9
 	// -12
 	// -14
