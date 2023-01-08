@@ -9,3 +9,20 @@ func Count(start int, step int, c chan int) {
 		step_mul += 1
 	}
 }
+
+// Cycle returns elements from `data`. When data is exhausted, go back to the start
+// e.g. Cycle([]int{1, 2, 3, 4}) --> 1, 2, 3, 4, 1, 2, ...
+//
+// If you want to iterate over a string, you can convert it to a slice of runes with
+// `[]rune(my_string)`
+//
+// Note that if T is a pointer (e.g. *MyType) or pointer-like (e.g. a slice or map), the
+// channel will send the pointer that value. This means they are not threadsafe, and you
+// should be aware that the items in `data` can change
+func Cycle[T any](data []T, c chan T) {
+	for {
+		for _, item := range data {
+			c <- item
+		}
+	}
+}
