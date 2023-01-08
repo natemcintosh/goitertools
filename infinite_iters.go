@@ -11,7 +11,7 @@ func Count(start int, step int, c chan int) {
 }
 
 // Cycle returns elements from `data`. When data is exhausted, go back to the start
-// e.g. Cycle([]int{1, 2, 3, 4}) --> 1, 2, 3, 4, 1, 2, ...
+// e.g. Cycle([]int{1, 2, 3, 4}, c) --> 1, 2, 3, 4, 1, 2, ...
 //
 // If you want to iterate over a string, you can convert it to a slice of runes with
 // `[]rune(my_string)`
