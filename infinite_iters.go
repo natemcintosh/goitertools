@@ -19,7 +19,7 @@ func Count(start int, step int, c chan int) {
 // Note that if T is a pointer (e.g. *MyType) or pointer-like (e.g. a slice or map), the
 // channel will send the pointer that value. This means they are not threadsafe, and you
 // should be aware that the items in `data` can change
-func Cycle[T any](data []T, c chan T) {
+func Cycle[S ~[]T, T any](data S, c chan T) {
 	for {
 		for _, item := range data {
 			c <- item
