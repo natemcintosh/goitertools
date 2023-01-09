@@ -34,12 +34,25 @@ func pythonCount(start, step, n int) []int {
 
 // str_array is a helper function that converts a slice into a string representation
 // of the slice. You might ask why not just `fmt.Sprintf` the slice, but that does not
-// put commas between items, and python wants commas. So we write this helper function
-func str_array(data []int) string {
+// put commas between items, and python wants commas. So we write this helper function.
+//
+// This is basically a copy of part of the source code for `strings.Join`
+func str_array[T any](data []T) string {
+	switch len(data) {
+	case 0:
+		return "[]"
+	case 1:
+		return "[" + fmt.Sprint(data[0]) + "]"
+	}
+
 	var sb strings.Builder
+	// Make a rough estimate of the lower bound of the number of runes needed
+	sb.Grow(len(data) * 2)
 	sb.WriteString("[")
-	for _, v := range data {
-		sb.WriteString(fmt.Sprintf("%d,", v))
+	sb.WriteString(fmt.Sprint(data[0]))
+	for _, v := range data[1:] {
+		sb.WriteString(",")
+		sb.WriteString(fmt.Sprint(v))
 	}
 	sb.WriteString("]")
 	return sb.String()
