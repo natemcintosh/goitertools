@@ -1,7 +1,7 @@
 package goitertools
 
 // Count will place numbers in the channel `c` to be received
-// e.g. Count(10, 1, c) --> 10, 11, 12, 13, 14, ...
+// e.g. `go Count(c, 10, 1)` --> 10, 11, 12, 13, 14, ...
 func Count(c chan int, start int, step int) {
 	step_mul := 0
 	for {
@@ -11,7 +11,7 @@ func Count(c chan int, start int, step int) {
 }
 
 // Cycle returns elements from `data`. When data is exhausted, go back to the start
-// e.g. Cycle([]int{1, 2, 3, 4}, c) --> 1, 2, 3, 4, 1, 2, ...
+// e.g. `go Cycle(c, []int{1, 2, 3, 4})` --> 1, 2, 3, 4, 1, 2, ...
 //
 // If you want to iterate over a string, you can convert it to a slice of runes with
 // `[]rune(my_string)`

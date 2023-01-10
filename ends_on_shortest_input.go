@@ -2,7 +2,7 @@ package goitertools
 
 // Accumulate sends accumulated results. E.g. if `fn` adds the two inputs, then
 // the channel sends the cumulative sum:
-// `Accumulate([]int{1, 2, 3, 4}, func(a, b int) int { return a + b }, c) --> 1, 3, 6, 10`
+// `go Accumulate([]int{1, 2, 3, 4}, func(a, b int) int { return a + b }, c) --> 1, 3, 6, 10`
 //
 // It is not recommended to use data where T is a pointer or pointer-like (e.g. slice)
 // As items in `data`, or `initial` may be changed. It also is not threadsafe
@@ -51,6 +51,45 @@ func AccumulateWithInit[S ~[]T, T any](c chan T, data S, fn func(T, T) T, initia
 	close(c)
 }
 
+// Chain sends elements from the first iterable until it is exhausted, then proceeds to
+// the next iterable, until all of the iterables are exhausted. I.e. it removes one
+// level of nesting.
 func Chain[S ~[]T, T any](c chan T, iterables ...S) {
+	for _, sl := range iterables {
+		for _, item := range sl {
+			c <- item
+		}
+	}
 
+	close(c)
+}
+
+// ChainFromIterable is an alternative way of calling `Chain`, where `iterable` is a
+// single nested slice-like type.
+func ChainFromIterable[S ~[][]T, T any](c chan T, iterable S) {
+	for _, sl := range iterable {
+		for _, item := range sl {
+			c <- item
+		}
+	}
+
+	close(c)
+}
+
+// Pairwise sends consecutive pairs from `data`.
+// If len(data) <= 1, the channel is immediately closed without sending anything, and
+// the function returns.
+//
+// E.g. `go Pairwise(c, []int{1, 2, 3})` --> [1, 2], [2, 3]
+func Pairwise[S ~[]T, T any](c chan [2]T, data S) {
+	if len(data) <= 1 {
+		close(c)
+		return
+	}
+
+	for idx := 1; idx < len(data); idx++ {
+		c <- [2]T{data[idx-1], data[idx]}
+	}
+
+	close(c)
 }

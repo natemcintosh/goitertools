@@ -18,3 +18,8 @@ def n_count(start: int, step: int, n: int):
 def accumulate(data: list[int]):
     for d in itertools.accumulate(data):
         print(d)
+
+
+def pairwise(data: list[int]):
+    for pair in itertools.pairwise(data):
+        print(f"{pair[0]},{pair[1]}")

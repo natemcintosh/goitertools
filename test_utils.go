@@ -83,3 +83,43 @@ func pythonAccumulate(data []int) []int {
 	return result
 
 }
+
+func pythonPairwise(data []int) [][2]int {
+	if len(data) <= 1 {
+		return [][2]int{}
+	}
+
+	str_data := str_array(data)
+
+	py_str := fmt.Sprintf("from py_versions import pairwise; pairwise(%s)", str_data)
+	cmd := exec.Command("python", "-c", py_str)
+
+	out, err := cmd.Output()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	s := strings.Split(strings.TrimSpace(string(out)), "\n")
+	result := make([][2]int, len(s))
+
+	for idx, sn := range s {
+		// python prints it out in the form "1,2" so we want to cut around the comma
+		before, after, found := strings.Cut(sn, ",")
+		if !found {
+			log.Fatalf("Could not find a comma to split on\n")
+		}
+
+		res1, err1 := strconv.Atoi(string(before))
+		res2, err2 := strconv.Atoi(string(after))
+		if err1 != nil {
+			log.Fatalln(err1)
+		}
+		if err2 != nil {
+			log.Fatalln(err2)
+		}
+		result[idx][0] = res1
+		result[idx][1] = res2
+	}
+	return result
+
+}

@@ -291,3 +291,122 @@ func TestStrArray(t *testing.T) {
 	got := str_array(data)
 	assert.Equal(t, "[1,2,3,4,5,6,7,8,9,10]", got)
 }
+
+// collect receives all the items from a channel until the channel is closed. NB, if the
+// sender does not close the channel, THIS WILL HANG. All items go into a slice
+func collect[T any](c chan T) []T {
+	res := make([]T, 0)
+
+	for v := range c {
+		res = append(res, v)
+	}
+	return res
+}
+
+func TestChainFromIterable(t *testing.T) {
+	testCases := []struct {
+		desc string
+		in   [][]int
+		c    chan int
+		want []int
+	}{
+		{
+			desc: "simple",
+			in:   [][]int{{1, 2}, {3, 4}},
+			c:    make(chan int),
+			want: []int{1, 2, 3, 4},
+		},
+		{
+			desc: "with empties",
+			in:   [][]int{{}, {5, 6}, {}},
+			c:    make(chan int),
+			want: []int{5, 6},
+		},
+
+		{
+			desc: "all empty",
+			in:   [][]int{{}, {}, {}},
+			c:    make(chan int),
+			want: []int{},
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			go ChainFromIterable(tC.c, tC.in)
+			got := collect(tC.c)
+			assert.Equal(t, tC.want, got)
+		})
+	}
+}
+
+func TestPairwise(t *testing.T) {
+	testCases := []struct {
+		desc string
+		in   []int
+		c    chan [2]int
+		want [][2]int
+	}{
+		{
+			desc: "simple",
+			in:   []int{1, 2, 3, 4, 5},
+			c:    make(chan [2]int),
+			want: [][2]int{{1, 2}, {2, 3}, {3, 4}, {4, 5}},
+		},
+		{
+			desc: "empty",
+			in:   []int{},
+			c:    make(chan [2]int),
+			want: [][2]int{},
+		},
+		{
+			desc: "one item",
+			in:   []int{1},
+			c:    make(chan [2]int),
+			want: [][2]int{},
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			go Pairwise(tC.c, tC.in)
+			got := collect(tC.c)
+			assert.Equal(t, tC.want, got)
+		})
+	}
+}
+
+func FuzzPairwise(f *testing.F) {
+	// For this fuzz test, input should be just a random seed. We'll use rand to generate
+	// how many items should go into `data`, and then fill it up
+	f.Add(int64(42))
+	f.Fuzz(func(t *testing.T, rand_seed int64) {
+		// Set the seed so that we always pick the same n for the inputs of this function
+		rand.Seed(rand_seed)
+		// Don't both checking more than 100 items
+		n := rand.Intn(100)
+		fmt.Println(n)
+		// Make sure n isn't 0
+		n += 1
+
+		data := make([]int, n)
+		for i := 0; i < n; i++ {
+			data[i] = rand.Intn(1000)
+		}
+
+		// Get the python output. Obviously firing up python every iteration is not ideal,
+		// but haven't yet figured out a way to keep python up and running between calls
+		want := pythonPairwise(data)
+
+		// Get the go output
+		got := make([][2]int, 0, n)
+		c := make(chan [2]int)
+
+		go Pairwise(c, data)
+
+		for v := range c {
+			got = append(got, v)
+		}
+
+		// Check that the go output matches python
+		assert.Equal(t, want, got)
+	})
+}
