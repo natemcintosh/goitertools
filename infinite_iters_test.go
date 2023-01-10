@@ -11,7 +11,7 @@ func TestCount1(t *testing.T) {
 	assert := assert.New(t)
 
 	c := make(chan int)
-	go Count(0, 1, c)
+	go Count(c, 0, 1)
 
 	assert.Equal(0, <-c)
 	assert.Equal(1, <-c)
@@ -22,7 +22,7 @@ func TestCount1(t *testing.T) {
 
 func BenchmarkCount1(b *testing.B) {
 	c := make(chan int)
-	go Count(0, 1, c)
+	go Count(c, 0, 1)
 
 	for i := 0; i < b.N; i++ {
 		<-c
@@ -33,7 +33,7 @@ func TestCount2(t *testing.T) {
 	assert := assert.New(t)
 
 	c := make(chan int)
-	go Count(0, 4, c)
+	go Count(c, 0, 4)
 
 	assert.Equal(0, <-c)
 	assert.Equal(4, <-c)
@@ -44,7 +44,7 @@ func TestCount2(t *testing.T) {
 
 func BenchmarkCount2(b *testing.B) {
 	c := make(chan int)
-	go Count(0, 4, c)
+	go Count(c, 0, 4)
 
 	for i := 0; i < b.N; i++ {
 		<-c
@@ -56,7 +56,7 @@ func TestCycle1(t *testing.T) {
 
 	c := make(chan float64)
 	data := []float64{1.0, 2.0, 3.14, 5.0}
-	go Cycle(data, c)
+	go Cycle(c, data)
 
 	assert.Equal(1.0, <-c)
 	assert.Equal(2.0, <-c)
@@ -71,7 +71,7 @@ func TestCycle1(t *testing.T) {
 func BenchmarkCycle1(b *testing.B) {
 	c := make(chan float64)
 	data := []float64{1.0, 2.0, 3.14, 5.0}
-	go Cycle(data, c)
+	go Cycle(c, data)
 
 	for i := 0; i < b.N; i++ {
 		<-c
@@ -83,7 +83,7 @@ func TestCycle2(t *testing.T) {
 
 	c := make(chan []int)
 	data := [][]int{{1, 2}, {3, 4}}
-	go Cycle(data, c)
+	go Cycle(c, data)
 
 	assert.Equal([]int{1, 2}, <-c)
 	assert.Equal([]int{3, 4}, <-c)
@@ -96,7 +96,7 @@ func TestCycle2(t *testing.T) {
 func BenchmarkCycle2(b *testing.B) {
 	c := make(chan []int)
 	data := [][]int{{1, 2}, {3, 4}}
-	go Cycle(data, c)
+	go Cycle(c, data)
 
 	for i := 0; i < b.N; i++ {
 		<-c
@@ -106,7 +106,7 @@ func BenchmarkCycle2(b *testing.B) {
 func TestPyCount(t *testing.T) {
 	n := 3
 	c := make(chan int)
-	go Count(0, 1, c)
+	go Count(c, 0, 1)
 
 	got := make([]int, n)
 	got[0] = <-c
@@ -137,7 +137,7 @@ func FuzzCount(f *testing.F) {
 		// Get the go output
 		got := make([]int, n)
 		c := make(chan int)
-		go Count(start, step, c)
+		go Count(c, start, step)
 		for i := 0; i < n; i++ {
 			got[i] = <-c
 		}

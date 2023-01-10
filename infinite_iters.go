@@ -2,7 +2,7 @@ package goitertools
 
 // Count will place numbers in the channel `c` to be received
 // e.g. Count(10, 1, c) --> 10, 11, 12, 13, 14, ...
-func Count(start int, step int, c chan int) {
+func Count(c chan int, start int, step int) {
 	step_mul := 0
 	for {
 		c <- start + (step * step_mul)
@@ -19,7 +19,7 @@ func Count(start int, step int, c chan int) {
 // Note that if T is a pointer (e.g. *MyType) or pointer-like (e.g. a slice or map), the
 // channel will send the pointer that value. This means they are not threadsafe, and you
 // should be aware that the items in `data` can change
-func Cycle[S ~[]T, T any](data S, c chan T) {
+func Cycle[S ~[]T, T any](c chan T, data S) {
 	for {
 		for _, item := range data {
 			c <- item

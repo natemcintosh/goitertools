@@ -13,7 +13,7 @@ func TestAccumulateWithInitAdd(t *testing.T) {
 	c := make(chan int)
 
 	add := func(a, b int) int { return a + b }
-	go AccumulateWithInit([]int{1, 2, 3, 4, 5}, add, 0, c)
+	go AccumulateWithInit(c, []int{1, 2, 3, 4, 5}, add, 0)
 
 	want := []int{0, 1, 3, 6, 10, 15}
 
@@ -27,7 +27,7 @@ func TestAccumulateWithInitAdd(t *testing.T) {
 func BenchmarkAccumulateWithInitAdd(b *testing.B) {
 	c := make(chan int)
 	add := func(a, b int) int { return a + b }
-	go AccumulateWithInit([]int{1, 2, 3, 4, 5}, add, 0, c)
+	go AccumulateWithInit(c, []int{1, 2, 3, 4, 5}, add, 0)
 
 	for i := 0; i < b.N; i++ {
 		<-c
@@ -38,7 +38,7 @@ func TestAccumulateWithInitAdd2(t *testing.T) {
 	c := make(chan int)
 
 	add := func(a, b int) int { return a + b }
-	go AccumulateWithInit([]int{1, 2, 3, 4, 5}, add, 10, c)
+	go AccumulateWithInit(c, []int{1, 2, 3, 4, 5}, add, 10)
 
 	want := []int{10, 11, 13, 16, 20, 25}
 
@@ -52,7 +52,7 @@ func TestAccumulateWithInitAdd2(t *testing.T) {
 func TestAccumulateWithInitMax(t *testing.T) {
 	c := make(chan float64)
 
-	go AccumulateWithInit([]float64{1, 2, 3, 4, 5}, math.Max, 0, c)
+	go AccumulateWithInit(c, []float64{1, 2, 3, 4, 5}, math.Max, 0)
 
 	want := []float64{0, 1, 2, 3, 4, 5}
 
@@ -65,7 +65,7 @@ func TestAccumulateWithInitMax(t *testing.T) {
 
 func TestAccumulateWithInitMin(t *testing.T) {
 	c := make(chan float64)
-	go AccumulateWithInit([]float64{1, 2, 3, 4, 5}, math.Min, 3, c)
+	go AccumulateWithInit(c, []float64{1, 2, 3, 4, 5}, math.Min, 3)
 
 	want := []float64{3, 1, 1, 1, 1, 1}
 
@@ -80,7 +80,7 @@ func TestAccumulateWithInitOneItem(t *testing.T) {
 	c := make(chan int)
 
 	add := func(a, b int) int { return a + b }
-	go AccumulateWithInit([]int{1}, add, 0, c)
+	go AccumulateWithInit(c, []int{1}, add, 0)
 
 	want := []int{0, 1}
 
@@ -95,7 +95,7 @@ func TestAccumulateWithInitEmpty(t *testing.T) {
 	c := make(chan int)
 
 	add := func(a, b int) int { return a + b }
-	go AccumulateWithInit([]int{}, add, 0, c)
+	go AccumulateWithInit(c, []int{}, add, 0)
 
 	want := []int{0}
 
@@ -113,7 +113,7 @@ func ExampleAccumulateWithInit() {
 	sub := func(a, b int) int { return a - b }
 	data := []int{5, 4, 3, 2, 1}
 	// The first item sent from AccumulateWithInit will be `initial`
-	go AccumulateWithInit(data, sub, 0, c)
+	go AccumulateWithInit(c, data, sub, 0)
 
 	for v := range c {
 		fmt.Printf("%v\n", v)
@@ -131,7 +131,7 @@ func TestAccumulateAdd(t *testing.T) {
 	c := make(chan int)
 
 	add := func(a, b int) int { return a + b }
-	go Accumulate([]int{1, 2, 3, 4, 5}, add, c)
+	go Accumulate(c, []int{1, 2, 3, 4, 5}, add)
 
 	want := []int{1, 3, 6, 10, 15}
 
@@ -145,7 +145,7 @@ func TestAccumulateAdd(t *testing.T) {
 func BenchmarkAccumulateAdd(b *testing.B) {
 	c := make(chan int)
 	add := func(a, b int) int { return a + b }
-	go Accumulate([]int{1, 2, 3, 4, 5}, add, c)
+	go Accumulate(c, []int{1, 2, 3, 4, 5}, add)
 
 	for i := 0; i < b.N; i++ {
 		<-c
@@ -156,7 +156,7 @@ func TestAccumulateAdd2(t *testing.T) {
 	c := make(chan int)
 
 	add := func(a, b int) int { return a + b }
-	go Accumulate([]int{1, 2, 3, 4, 5}, add, c)
+	go Accumulate(c, []int{1, 2, 3, 4, 5}, add)
 
 	want := []int{1, 3, 6, 10, 15}
 
@@ -170,7 +170,7 @@ func TestAccumulateAdd2(t *testing.T) {
 func TestAccumulateMax(t *testing.T) {
 	c := make(chan float64)
 
-	go Accumulate([]float64{1, 2, 3, 4, 5}, math.Max, c)
+	go Accumulate(c, []float64{1, 2, 3, 4, 5}, math.Max)
 
 	want := []float64{1, 2, 3, 4, 5}
 
@@ -183,7 +183,7 @@ func TestAccumulateMax(t *testing.T) {
 
 func TestAccumulateMin(t *testing.T) {
 	c := make(chan float64)
-	go Accumulate([]float64{1, 2, 3, 4, 5}, math.Min, c)
+	go Accumulate(c, []float64{1, 2, 3, 4, 5}, math.Min)
 
 	want := []float64{1, 1, 1, 1, 1}
 
@@ -201,7 +201,7 @@ func ExampleAccumulate() {
 	sub := func(a, b int) int { return a - b }
 	data := []int{5, 4, 3, 2, 1}
 	// The first item sent from AccumulateWithInit will be `initial`
-	go Accumulate(data, sub, c)
+	go Accumulate(c, data, sub)
 
 	for v := range c {
 		fmt.Printf("%v\n", v)
@@ -218,7 +218,7 @@ func TestAccumulateOneItem(t *testing.T) {
 	c := make(chan int)
 
 	add := func(a, b int) int { return a + b }
-	go Accumulate([]int{1}, add, c)
+	go Accumulate(c, []int{1}, add)
 
 	want := []int{1}
 
@@ -233,7 +233,7 @@ func TestAccumulateEmpty(t *testing.T) {
 	c := make(chan int)
 
 	add := func(a, b int) int { return a + b }
-	go Accumulate([]int{}, add, c)
+	go Accumulate(c, []int{}, add)
 
 	collected := make([]int, 0)
 	for v := range c {
@@ -268,7 +268,7 @@ func FuzzAccumulate(f *testing.F) {
 		c := make(chan int)
 		add := func(a, b int) int { return a + b }
 
-		go Accumulate(data, add, c)
+		go Accumulate(c, data, add)
 
 		for i := 0; i < n; i++ {
 			got[i] = <-c
